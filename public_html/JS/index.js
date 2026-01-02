@@ -68,16 +68,6 @@ function validateData() {
         $("#dest").focus();
         return "";
     }
-//    if(sDate = ""){
-//        alert("Shipping date is missing");
-//        $("#sDate").focus();
-//        return "";
-//    }
-//    if(dDate = ""){
-//        alert("Delivery date is missing");
-//        $("#dDate").focus();
-//        return "";
-//    }
 
     var jsonObj = {
         ship_no: shipNo,
@@ -107,7 +97,7 @@ function updateData(){
 function getShippment(){
     var shipId = $("#shipNo").val();
     var jsonStr = {
-        id: shipId
+        ship_no: shipId
     };
     var shipNo = JSON.stringify(jsonStr);
     
@@ -123,19 +113,32 @@ function getShippment(){
         
         $("#update").prop("disabled", false);
         $("#reset").prop("disabled", false);
-        $("#desc ").focus();
+        $("#desc").focus();
     }
     else if(resJsonObj.status === 400){
         $("#save").prop("disabled", false);
         $("#reset").prop("disabled", false);
-        $("#desc ").focus();
+        $("#desc").focus();
     }
 }
 
 function fillData(jsonObj){
-    saveRecNo(jsonObj);
-    var record = JSON.parse(jsonObj.data).record;
-    
+    let data = jsonObj.data;
+    if (typeof data === "string") {
+        try {
+            data = JSON.parse(data);
+        } catch (e) {
+            console.error("FAILED TO PARSE:", data);
+        }
+    }
+    if (!data || !data.record) {
+        alert("No record found format mismatch!");
+        return;
+    }
+
+    var record = data.record;
+    console.log("RECORD:", record);
+
     $("#shipNo").val(record.ship_no);
     $("#desc").val(record.description);
     $("#source").val(record.source);
@@ -143,6 +146,7 @@ function fillData(jsonObj){
     $("#sDate").val(record.shipping_date);
     $("#dDate").val(record.delivery_date);
 }
+
 
 function saveRecNo(jsonObj){
     var recData = JSON.parse(jsonObj.data);
